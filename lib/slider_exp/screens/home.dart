@@ -31,7 +31,10 @@ class _SliderHomeState extends State<SliderHome> {
                 height: 30,
               ),
               BlocBuilder<SwitchBloc, SwitchState>(
+                buildWhen: (previous, current) =>
+                    previous.isSwitch != current.isSwitch,
                 builder: (context, state) {
+                  log("notification build");
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -65,17 +68,36 @@ class _SliderHomeState extends State<SliderHome> {
               const SizedBox(
                 height: 20,
               ),
-              Container(
-                height: 200,
-                width: MediaQuery.of(context).size.width,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                ),
+              BlocBuilder<SwitchBloc, SwitchState>(
+                buildWhen: (previous, current) =>
+                    previous.slider != current.slider,
+                builder: (context, state) {
+                  log("slider build");
+                  return Column(
+                    children: [
+                      Container(
+                        height: 200,
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(state.slider),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Slider(
+                        value: state.slider,
+                        onChanged: (value) {
+                          log(value.toString());
+                          context
+                              .read<SwitchBloc>()
+                              .add(SliderEvent(slider: value));
+                        },
+                      )
+                    ],
+                  );
+                },
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              Slider(value: .8, onChanged: (value) {})
             ],
           ),
         ),

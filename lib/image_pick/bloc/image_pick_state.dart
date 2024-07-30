@@ -1,10 +1,13 @@
 part of 'image_pick_bloc.dart';
 
-sealed class ImagePickState extends Equatable {
-  const ImagePickState();
-  
-  @override
-  List<Object> get props => [];
-}
+class ImagePickState extends Equatable {
+  final XFile? image;
+  const ImagePickState({this.image});
 
-final class ImagePickInitial extends ImagePickState {}
+  ImagePickState copyWith({XFile? image}) {
+    return ImagePickState(image: image ?? this.image);
+  }
+
+  @override
+  List<Object?> get props => [image];
+}
