@@ -13,6 +13,7 @@ class UsersScreen extends StatefulWidget {
 }
 
 class _UsersScreenState extends State<UsersScreen> {
+  final TextEditingController _controller = TextEditingController();
   @override
   void initState() {
     context.read<PostsBloc>().add(Fetchusers());
@@ -21,55 +22,95 @@ class _UsersScreenState extends State<UsersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("API Responses"),
-        centerTitle: true,
-      ),
-      body: BlocBuilder<PostsBloc, PostsState>(
-        builder: (context, state) {
-          log(state.apiStatus.toString());
-          log(state.users.length.toString());
-          switch (state.apiStatus) {
-            case APIStatus.failed:
-              return Center(
-                child: Text(state.msg),
-              );
-            case APIStatus.loading:
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            case APIStatus.complete:
-              if (state.posts.isEmpty) {
-                return const Center(child: Text("No Data"));
-              } else {
-                return ListView.builder(
-                  itemCount: state.users.length,
-                  itemBuilder: (context, index) {
-                    final user = state.users[index];
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(
-                        child: ListTile(
-                          title: Text(
-                            "${user.id} = ${user.name.toString()}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("API Responses"),
+          centerTitle: true,
+        ),
+        body: BlocBuilder<PostsBloc, PostsState>(
+          builder: (context, state) {
+            log(state.apiStatus.toString());
+            log(state.users.length.toString());
+            switch (state.apiStatus) {
+              case APIStatus.failed:
+                return Center(
+                  child: Text(state.msg),
+                );
+              case APIStatus.loading:
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              case APIStatus.complete:
+                if (state.posts.isEmpty) {
+                  return const Center(child: Text("No Data"));
+                } else {
+                  return Column(children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: TextField(
+                        onChanged: (value) {
+                          context.read<PostsBloc>().add(
+                                SearchItem(
+                                  value,
+                                ),
+                              );
+                        },
+                        controller: _controller,
+                        decoration: InputDecoration(
+                          hintText: "Search by email",
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
                           ),
-                          subtitle: Text(user.email.toString()),
                         ),
                       ),
-                    );
-                  },
-                );
-              }
+                    ),
+                    const SizedBox(
+                      height: 12,
+                    ),
+                    Expanded(
+                      child: state.searchMsg.isNotEmpty
+                          ? Center(child: Text(state.searchMsg))
+                          : ListView.builder(
+                              itemCount: state.tempUsers.isEmpty
+                                  ? state.users.length
+                                  : state.tempUsers.length,
+                              itemBuilder: (context, index) {
+                                final user = state.tempUsers.isEmpty
+                                    ? state.users[index]
+                                    : state.tempUsers[index];
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Card(
+                                    child: ListTile(
+                                      title: Text(
+                                        "${user.id} = ${user.name.toString()}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      subtitle: Text(user.email.toString()),
+                                      trailing:
+                                          Text(user.address!.city.toString()),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ]);
+                }
 
-            default:
-              return Center(
-                child: Text(state.msg),
-              );
-          }
-        },
+              default:
+                return Center(
+                  child: Text(state.msg),
+                );
+            }
+          },
+        ),
       ),
     );
   }

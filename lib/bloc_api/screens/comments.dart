@@ -13,6 +13,7 @@ class CommentsScreen extends StatefulWidget {
 }
 
 class _CommentsScreenState extends State<CommentsScreen> {
+  final TextEditingController _controller = TextEditingController();
   @override
   void initState() {
     context.read<PostsBloc>().add(FetchComments());
@@ -21,54 +22,95 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("API Responses"),
-        centerTitle: true,
-      ),
-      body: BlocBuilder<PostsBloc, PostsState>(
-        builder: (context, state) {
-          log(state.apiStatus.toString());
-          switch (state.apiStatus) {
-            case APIStatus.failed:
-              return Center(
-                child: Text(state.msg),
-              );
-            case APIStatus.loading:
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            case APIStatus.complete:
-              if (state.posts.isEmpty) {
-                return const Center(child: Text("No Data"));
-              } else {
-                return ListView.builder(
-                  itemCount: state.comments.length,
-                  itemBuilder: (context, index) {
-                    final comments = state.comments[index];
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(
-                        child: ListTile(
-                          title: Text(
-                            "${comments.id} = ${comments.email.toString()}",
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("API Responses"),
+          centerTitle: true,
+        ),
+        body: BlocBuilder<PostsBloc, PostsState>(
+          builder: (context, state) {
+            log(state.apiStatus.toString());
+            switch (state.apiStatus) {
+              case APIStatus.failed:
+                return Center(
+                  child: Text(state.msg),
+                );
+              case APIStatus.loading:
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              case APIStatus.complete:
+                if (state.posts.isEmpty) {
+                  return const Center(child: Text("No Data"));
+                } else {
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: TextField(
+                          onChanged: (value) {
+                            context.read<PostsBloc>().add(
+                                  SearchItem(
+                                    value.toString(),
+                                  ),
+                                );
+                          },
+                          controller: _controller,
+                          decoration: InputDecoration(
+                            hintText: "Search by email",
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
                           ),
-                          subtitle: Text(comments.body.toString()),
                         ),
                       ),
-                    );
-                  },
-                );
-              }
+                      const SizedBox(
+                        height: 12,
+                      ),
+                      Expanded(
+                        child: state.searchMsg.isNotEmpty
+                            ? Center(child: Text(state.searchMsg))
+                            : ListView.builder(
+                                itemCount: state.tempComments.isEmpty
+                                    ? state.comments.length
+                                    : state.tempComments.length,
+                                itemBuilder: (context, index) {
+                                  final comments = state.tempComments.isEmpty
+                                      ? state.comments[index]
+                                      : state.tempComments[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Card(
+                                      child: ListTile(
+                                        title: Text(
+                                          "${comments.id} = ${comments.email.toString()}",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        subtitle:
+                                            Text(comments.body.toString()),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  );
+                }
 
-            default:
-              return Center(
-                child: Text(state.msg),
-              );
-          }
-        },
+              default:
+                return Center(
+                  child: Text(state.msg),
+                );
+            }
+          },
+        ),
       ),
     );
   }

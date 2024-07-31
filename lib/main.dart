@@ -1,5 +1,5 @@
+import 'package:bloc_course/auth/screens/login.dart';
 import 'package:bloc_course/bloc_api/bloc/posts_bloc.dart';
-import 'package:bloc_course/bloc_api/screens/home_api.dart';
 import 'package:bloc_course/counter/bloc/counter_bloc.dart';
 import 'package:bloc_course/favourite_exp/bloc/favourite_bloc.dart';
 import 'package:bloc_course/favourite_exp/repository/favourite_repo.dart';
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         debugShowCheckedModeBanner: false,
-        home: const APiHomeScreen(),
+        home: const LoginScreen(),
       ),
     );
   }
