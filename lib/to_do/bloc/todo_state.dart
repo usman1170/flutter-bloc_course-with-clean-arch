@@ -1,10 +1,16 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'todo_bloc.dart';
 
-sealed class TodoState extends Equatable {
-  const TodoState();
-  
-  @override
-  List<Object> get props => [];
-}
+class TodoState extends Equatable {
+  final List<String> items;
+  const TodoState({
+    this.items = const [],
+  });
 
-final class TodoInitial extends TodoState {}
+  TodoState copyWith({List<String>? items}) {
+    return TodoState(items: items ?? this.items);
+  }
+
+  @override
+  List<Object> get props => [items];
+}

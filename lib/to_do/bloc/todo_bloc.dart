@@ -5,7 +5,18 @@ part 'todo_event.dart';
 part 'todo_state.dart';
 
 class TodoBloc extends Bloc<TodoEvent, TodoState> {
-  TodoBloc() : super(TodoInitial()) {
-    on<TodoEvent>((event, emit) {});
+  final List<String> items = [];
+  TodoBloc() : super(const TodoState()) {
+    on<AddToDoEvent>(addItem);
+    on<RemoveToDoEvent>(deleteItem);
+  }
+  void addItem(AddToDoEvent event, Emitter<TodoState> emit) {
+    items.add(event.title);
+    emit(state.copyWith(items: List.from(items)));
+  }
+
+  void deleteItem(RemoveToDoEvent event, Emitter<TodoState> emit) {
+    items.remove(event.index);
+    emit(state.copyWith(items: List.from(items)));
   }
 }
